@@ -3,16 +3,16 @@ import data.*
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.File
-import java.io.FileReader
 import java.io.FileWriter
 
-const val INPUT_FILE = "resources/raw/input.json"
-const val OUTPUT_FILE = "resources/raw/output.sql"
+const val INPUT_FILE = "raw/input.json"
+const val OUTPUT_FILE = "script.sql"
 
 fun main() {
     println("App initialized")
     val gson = GsonBuilder().create()
-    val jsonReader = FileReader(File(INPUT_FILE))
+    val jsonReader = ClassLoader.getSystemResourceAsStream(INPUT_FILE)?.reader(Charsets.UTF_8)
+        ?: throw IllegalStateException("Unable to open resource file for reading")
     val jsonConverter = { gson.fromJson(jsonReader, InputData::class.java) }
     val resultWriter = FileWriter(File(OUTPUT_FILE).apply { if (exists()) delete(); createNewFile() })
     val write = { text: String -> resultWriter.write(text); resultWriter.flush() }
