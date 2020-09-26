@@ -62,6 +62,9 @@ fun main() {
             write("\n\n/* GEOZONE */\n")
             write(data.geozones.joinToString(separator = "\n", transform = GeozoneX::toSqlInit))
 
+            write("\n\n/* STAT */\n")
+            write(data.contractors.joinToString(separator = "\n", transform = Contractor::toStatSqlInit))
+
             write("\n\n/* CONTR_SERV */\n")
             val contrServList = data.contractors.flatMap { contractor -> contractor.toContServ() }
             write(contrServList.joinToString(separator = "\n", transform = ContrServDto::toSqlInit))
@@ -113,6 +116,13 @@ private fun Contractor.toContServ(): List<ContrServDto> = services.map {
         supplementaryConditions = supplementaryConditions,
         geozones = it.geozones
     )
+}
+
+private fun Contractor.toStatSqlInit() = let {
+    val stat = statistics.orderStatistics
+    """
+        INSERT INTO STAT (id, assignedOverall, completed, cancelled, clientCancelled, failed) VALUES ('$id', '${stat.ordersAssignedOverall}', '${stat.ordersCompleted}', '${stat.ordersCancelled}', '${stat.ordersCancelledByClient}', '${stat.ordersFailedToComplete}')        
+    """.trimIndent()
 }
 
 private fun ContrServDto.toSqlInit() =
